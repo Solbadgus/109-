@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/bootstrap.min.css.gz">
+  <script src="js/jquery-3.5.1.min.js.gz"></script>
+  <script src="js/bootstrap.min.js.gz"></script>
+  <title>index</title>
+</head>
+
+<body>
+
+  <div class="container p-4 my-4 bg-dark text-white">
+    <h1 class="display-3">專題計數器頁面</h1>
+  </div>
+
+  <div class="container">
+    <h2>用戶登入</h2>
+    <form action="/check" method="POST" class="was-validated" name="username_password">
+      <div class="form-group">
+        <label for="usr">Name:</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+        <div class="valid-feedback">Valid.</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <div class="form-group">
+        <label for="pwd">Password:</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter username" required>
+        <div class="valid-feedback">Valid.</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</body>
+
+</html>

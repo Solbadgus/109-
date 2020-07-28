@@ -3,8 +3,8 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 
-const char* ssid = "Dragon_yue";
-const char* password = "Dragonyue0417";
+const char* ssid = "Ks-iphone";
+const char* password = "1111111111110";
 String usn ="admin";
 String psd ="admin";
 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/bootstrap.min.css.gz">
+	<script src="js/jquery-3.5.1.min.js.gz"></script>
+	<script src="js/bootstrap.min.js.gz"></script>
+	<script src="var/function.js"></script>
+	<title>index</title>
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row">
+
+			<div class="container p-4 my-4 bg-dark text-white">
+				<a href="LOG.html" role="button" class="btn btn-outline-danger active float-right">進階設定</a>
+				<h1 class="display-3">專題計數器頁面</h1>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div class="container p-4 my-4 bg-info text-white">
+					<ul class="list-group">
+						<li class="list-group-item list-group-item-info">
+							<div class="row">
+								<div class="col-sm-3"><span>目前總時間</span></div>
+								<div class="col-sm-9"><span id="id_ttime"></span></div>
+							</div>
+						</li>
+						<li class="list-group-item list-group-item-info">
+							<div class="row">
+								<div class="col-sm-3"><span class="text-danger">剩餘時間</span></div>
+								<div class="col-sm-9"><span id="id_stime" class="text-danger"></span></div>
+							</div>
+						</li>
+						<li class="list-group-item list-group-item-info">
+							<div class="row">
+								<div class="col-sm-3"><span>目前狀態</span></div>
+								<div class="col-sm-9"><span id="id_nstate">STOP</span></div>
+							</div>
+						</li>
+						<li class="list-group-item list-group-item-info">
+							<div class="row">
+								<div class="col-sm-3"><span>已設定閃爍時間</span></div>
+								<div class="col-sm-9"><span id="id_ftime"></span></div>
+							</div>
+						</li>
+						<li class="list-group-item list-group-item-info">
+							<div class="row">
+								<div class="col-sm-3"><span>提示鈴時間</span></div>
+								<div class="col-sm-9"><span id="id_ptime"></span></div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-9">
+		</div>
+		<div class="col-sm-3">
+			<h6 class="text-muted">切勿抄襲 <small>by Mockingjay </small></h6>
+		</div>
+	</div>
+	</div>
+	<script>
+		get_data_json();
+	</script>
+</body>
+
+</html>
