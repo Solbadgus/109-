@@ -4,7 +4,7 @@
 #include <ESP8266WebServer.h>
 
 const char* ssid = "Ks-iphone";
-const char* password = "1111111111110";
+const char* password = "1111111110";
 String usn ="admin";
 String psd ="admin";
 
@@ -123,7 +123,6 @@ server.on("/index.html", fileindex);
 server.on("/LOG.html", LOG);
 server.on("/set.html", SET);
 server.on("/var/function.js",func);
-//server.on("/VAR/var.js",var);
 server.on("/css/bootstrap.min.css.gz", bootstrap);
 server.on("/js/bootstrap.min.js.gz", bootstrapmin);
 server.on("/js/jquery-3.5.1.min.js.gz", jquery);
@@ -142,30 +141,22 @@ server.on("/check", []() {
 server.on("/set_state_on", []() { 
   server.send(200, "text/html",RE_SET );
   Serial.println("on");
+  nstate = 1;
 });
 server.on("/set_state_off", []() {
   server.send(200, "text/html",RE_SET );
   Serial.println("off");
+  nstate = 0;
+
 });
 
 server.on("/data.json", []() {
   server.send(200, "application/json", "[{\"ttime\":\""+ String(ttime) + "\",\"stime\":\"" + String(stime) + "\",\"nstate\":\"" + String(nstate) + "\", \"ftime\":\"" + String(ftime) + "\", \"ptime\":\"" + String(ptime) + "\"}]");
-  /*
-   * int ttime = 0;
-int stimr = 0;
-int nstate = 0;
-int ftime = 5;
-int ptime = 30;
-   */
 });
 
 server.on("/set_var", []() {
   set_stime_m = server.arg("set_stime_m");
   set_stime_s = server.arg("set_stime_s");
-  /*Serial.print("set_stime_m: ");
-  Serial.println(set_stime_m);
-  Serial.print("set_stime_s: ");
-  Serial.println(set_stime_s);*/
   if((set_stime_m=="") && (set_stime_s==""))
   {
       Serial.println("No Enter the stime Data.");
@@ -221,12 +212,6 @@ void func()
   File file = SPIFFS.open("/var/function.js", "r"); 
   size_t sent = server.streamFile(file, "application/javascript");
 }
-
-/*void var()
-{
-  File file = SPIFFS.open("/VAR/var.js", "r"); 
-  size_t sent = server.streamFile(file, "application/javascript");
-}*/
 
 void fileindex()
 {
