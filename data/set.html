@@ -27,13 +27,13 @@
 						<li class="list-group-item list-group-item-info">
 							<div class="row">
 								<div class="col-sm-3"><span>目前總時間</span></div>
-								<div class="col-sm-9"><span id="id_ttime"></span>秒</div>
+								<div class="col-sm-9"><span id="id_ttime"></span></div>
 							</div>
 						</li>
 						<li class="list-group-item list-group-item-info">
 							<div class="row">
 								<div class="col-sm-3"><span class="text-danger">剩餘時間</span></div>
-								<div class="col-sm-9 text-danger"><span id="id_stime" class="text-danger"></span>秒</div>
+								<div class="col-sm-9 text-danger"><span id="id_stime" class="text-danger"></span></div>
 							</div>
 						</li>
 						<li class="list-group-item list-group-item-info">
@@ -140,6 +140,7 @@
 	</div>
 	<script>
 		get_data_json();
+		setInterval('get_data_json()',1000); 
 	</script>
 </body>
 

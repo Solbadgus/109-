@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
+#include<Timer.h>
 
 const char* ssid = "Ks-iphone";
 const char* password = "1111111110";
@@ -107,6 +108,18 @@ const char SET_VAR[] =
 
 
 ESP8266WebServer server(80);
+
+Timer t1s;
+
+void count()
+{
+  ttime +=1;
+  if(nstate)
+  {
+    stime -=1;
+  }
+}
+
 void setup() {
    Serial.begin(115200);
    WiFi.mode(WIFI_STA);
@@ -151,7 +164,7 @@ server.on("/set_state_off", []() {
 });
 
 server.on("/data.json", []() {
-  server.send(200, "application/json", "[{\"ttime\":\""+ String(ttime) + "\",\"stime\":\"" + String(stime) + "\",\"nstate\":\"" + String(nstate) + "\", \"ftime\":\"" + String(ftime) + "\", \"ptime\":\"" + String(ptime) + "\"}]");
+  server.send(200, "application/json", "[{\"ttime_m\":\""+ String(ttime/60) + "\",\"ttime_s\":\""+ String(ttime%60) + "\",\"stime_m\":\""+ String(stime/60) + "\",\"stime_s\":\"" + String(stime%60) + "\",\"nstate\":\"" + String(nstate) + "\", \"ftime\":\"" + String(ftime) + "\", \"ptime\":\"" + String(ptime) + "\"}]");
 });
 
 server.on("/set_var", []() {
@@ -187,13 +200,14 @@ server.on("/set_var", []() {
 
 //NEW
 SPIFFS.begin(); 
-
+t1s.every(1000,count);
 
 }
 
 void loop() 
 {
   server.handleClient();
+  t1s.update();
 }
 
 void LOG()
