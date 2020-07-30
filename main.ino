@@ -108,8 +108,22 @@ const char SET_VAR[] =
 
 
 ESP8266WebServer server(80);
-
 Timer t1s;
+Timer t5s;
+
+void correction()
+{
+  Serial.print("ttime: ");
+  Serial.println(ttime);
+  Serial.print("stime: ");
+  Serial.println(stime);
+  Serial.print("nstate: ");
+  Serial.println(nstate);
+  Serial.print("ftime: ");
+  Serial.println(ftime);
+  Serial.print("ptime: ");
+  Serial.println(ptime);
+}
 
 void count()
 {
@@ -121,93 +135,103 @@ void count()
 }
 
 void setup() {
-   Serial.begin(115200);
-   WiFi.mode(WIFI_STA);
-   WiFi.begin(ssid,password); 
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid,password); 
    // Wait for connection
+  WiFi.config(IPAddress(192,168,4,2),IPAddress(192,168,4,1),IPAddress(255,255,255,0));//固定IP
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
+  Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
-server.begin(); 
-server.on("/", fileindex);
-server.on("/index.html", fileindex);
-server.on("/LOG.html", LOG);
-server.on("/set.html", SET);
-server.on("/var/function.js",func);
-server.on("/css/bootstrap.min.css.gz", bootstrap);
-server.on("/js/bootstrap.min.js.gz", bootstrapmin);
-server.on("/js/jquery-3.5.1.min.js.gz", jquery);
-server.on("/check", []() {
-  String username = server.arg("username");
-  String passwd = server.arg("password");
-  if((username == usn) &&(passwd == psd))
-  {
+  server.begin(); 
+  server.on("/", fileindex);
+  server.on("/index.html", fileindex);
+  server.on("/LOG.html", LOG);
+  server.on("/set.html", SET);
+  server.on("/var/function.js",func);
+  server.on("/css/bootstrap.min.css.gz", bootstrap);
+  server.on("/js/bootstrap.min.js.gz", bootstrapmin);
+  server.on("/js/jquery-3.5.1.min.js.gz", jquery);
+  server.on("/check", []() {
+    String username = server.arg("username");
+    String passwd = server.arg("password");
+    if((username == usn) &&(passwd == psd))
+    {
+      server.send(200, "text/html",RE_SET );
+    }
+    else
+    {
+      server.send(200, "text/html",RE_LOG );
+    }
+  });
+  server.on("/set_state_on", []() { 
     server.send(200, "text/html",RE_SET );
-  }
-  else
-  {
-    server.send(200, "text/html",RE_LOG );
-  }
-});
-server.on("/set_state_on", []() { 
-  server.send(200, "text/html",RE_SET );
-  Serial.println("on");
-  nstate = 1;
-});
-server.on("/set_state_off", []() {
-  server.send(200, "text/html",RE_SET );
-  Serial.println("off");
-  nstate = 0;
+    Serial.print("nstate: ");
+    nstate = 1;
+    Serial.println(nstate);
+  });
+  server.on("/set_state_off", []() {
+    server.send(200, "text/html",RE_SET );
+    Serial.print("nstate: ");
+    nstate = 0;
+    Serial.println(nstate);
+  });
 
-});
+  server.on("/data.json", []() {
+    server.send(200, "application/json", "[{\"ttime_m\":\""+ String(ttime/60) + "\",\"ttime_s\":\""+ String(ttime%60) + "\",\"stime_m\":\""+ String(stime/60) + "\",\"stime_s\":\"" + String(stime%60) + "\",\"nstate\":\"" + String(nstate) + "\", \"ftime\":\"" + String(ftime) + "\", \"ptime\":\"" + String(ptime) + "\"}]");
+  });
 
-server.on("/data.json", []() {
-  server.send(200, "application/json", "[{\"ttime_m\":\""+ String(ttime/60) + "\",\"ttime_s\":\""+ String(ttime%60) + "\",\"stime_m\":\""+ String(stime/60) + "\",\"stime_s\":\"" + String(stime%60) + "\",\"nstate\":\"" + String(nstate) + "\", \"ftime\":\"" + String(ftime) + "\", \"ptime\":\"" + String(ptime) + "\"}]");
-});
-
-server.on("/set_var", []() {
-  set_stime_m = server.arg("set_stime_m");
-  set_stime_s = server.arg("set_stime_s");
-  if((set_stime_m=="") && (set_stime_s==""))
-  {
-      Serial.println("No Enter the stime Data.");
-  }
-  else
-  {
-    set_stime =  (set_stime_m.toInt()*60)+(set_stime_s.toInt());
-    Serial.print("set_stime: ");
-    Serial.println(set_stime);
-    stime = set_stime;
-  }
-  set_ftime_m = server.arg("set_ftime_m");
-  set_ftime_s = server.arg("set_ftime_s");
-  set_ftime =  (set_ftime_m.toInt()*60)+(set_ftime_s.toInt());
-  set_ptime_m = server.arg("set_ptime_m");
-  set_ptime_s = server.arg("set_ptime_s");
-  set_ptime =  (set_ptime_m.toInt()*60)+(set_ptime_s.toInt());
-  Serial.print("set_ftime: ");
-  Serial.println(set_ftime);
-  ftime = set_ftime;
-  Serial.print("set_ptime: ");
-  Serial.println(set_ptime);
-  ptime = set_ptime;
-  server.send(200, "text/html",SET_VAR );
-  Serial.println("已完成設定");
-});
+  server.on("/set_var", []() {
+    set_stime_m = server.arg("set_stime_m");
+    set_stime_s = server.arg("set_stime_s");
+    if((set_stime_m=="") && (set_stime_s==""))
+    {
+        //Serial.println("No Enter the stime Data.");
+    }
+    else
+    {
+      set_stime =  (set_stime_m.toInt()*60)+(set_stime_s.toInt());
+      Serial.print("stime: ");
+      Serial.println(set_stime);
+      stime = set_stime;
+    }
+    set_ftime_m = server.arg("set_ftime_m");
+    set_ftime_s = server.arg("set_ftime_s");
+    set_ftime =  (set_ftime_m.toInt()*60)+(set_ftime_s.toInt());
+    set_ptime_m = server.arg("set_ptime_m");
+    set_ptime_s = server.arg("set_ptime_s");
+    set_ptime =  (set_ptime_m.toInt()*60)+(set_ptime_s.toInt());
+    Serial.print("ftime: ");
+    Serial.println(set_ftime);
+    ftime = set_ftime;
+    Serial.print("ptime: ");
+    Serial.println(set_ptime);
+    ptime = set_ptime;
+    server.send(200, "text/html",SET_VAR );
+    //Serial.println("已完成設定");
+  });
 
 
 //NEW
-SPIFFS.begin(); 
-t1s.every(1000,count);
-
+  SPIFFS.begin(); 
+  t1s.every(1000,count);
+  t5s.every(5000,correction);
 }
 
 void loop() 
 {
   server.handleClient();
   t1s.update();
+  t5s.update();
+
+  String readdata ;
+  while (Serial.available()>0) {   //如果暫存器有訊號則不斷讀取直到沒有
+    readdata=Serial.readString();
+    //Serial.print(readdata);
+  }
 }
 
 void LOG()
