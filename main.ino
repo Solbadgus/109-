@@ -4,8 +4,8 @@
 #include <ESP8266WebServer.h>
 #include<Timer.h>
 
-const char* ssid = "Ks-iphone";
-const char* password = "1111111110";
+const char* ssid = "ESP8266_AP";
+const char* password = "@Aass_esp8266";
 String usn ="admin";
 String psd ="admin";
 
@@ -139,7 +139,7 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid,password); 
    // Wait for connection
-  WiFi.config(IPAddress(192,168,4,2),IPAddress(192,168,4,1),IPAddress(255,255,255,0));//固定IP
+  WiFi.config(IPAddress(192,168,4,101),IPAddress(192,168,4,254),IPAddress(255,255,255,0));//固定IP
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
