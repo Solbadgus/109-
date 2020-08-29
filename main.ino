@@ -20,7 +20,7 @@ int set_ftime;
 int set_ptime;
 int ttime = 0; //總時間
 int stime = 0; //剩餘時間
-int nstate = 0;//倒數狀態 STOP/START
+int nstate = 2;//倒數狀態 STOP/START/SETTING/UP
 int ftime = 5; //閃爍時間
 int ptime = 30;//提示鈴時間
 const char RE_LOG[] =
@@ -113,22 +113,68 @@ Timer t5s;
 
 void correction()
 {
-  Serial.print("ttime: ");
-  Serial.println(ttime);
-  Serial.print("stime: ");
-  Serial.println(stime);
-  Serial.print("nstate: ");
-  Serial.println(nstate);
-  Serial.print("ftime: ");
-  Serial.println(ftime);
-  Serial.print("ptime: ");
-  Serial.println(ptime);
+  Serial.print("Am,");
+  Serial.print(String(ttime/60)+",");
+  Serial.print("As,");
+  Serial.print(String(ttime%60)+",");
+  Serial.print("Bm,");
+  Serial.print(String(stime/60)+",");
+  Serial.print("Bs,");
+  Serial.print(String(stime%60)+",");
+  Serial.print("C,");
+  Serial.print(String(nstate)+",");
+  Serial.print("D,");
+  Serial.print(String(ftime)+",");
+  Serial.print("E,");
+  //Serial.print(String(ptime)+",");
+  Serial.println(String(ptime)+",");
+}
+
+void get_info_arm()
+{
+  if(Serial.available())
+  {
+    String str1 = Serial.readString();
+    str1.trim();
+    int spiltcount = str1.length();
+    int value [14];
+    int oposition = 0;
+    int i = 0;
+    while(1)
+    {
+      value[i] = str1.indexOf(",",oposition);
+      oposition = value[i] +1;
+      //Serial.println(oposition);
+      if(oposition >= spiltcount-1)
+      {
+        break;
+      }
+      i+=1;
+    }
+    //Serial.println("i is : "+String(i));
+    /*for(int j = 1 ; j <= i; j++)
+    {
+      //Serial.print(String(value[j-1])+", ");
+      Serial.println(str1.substring(value[j-1]+1,value[j]));
+    }*/
+    set_stime_m = str1.substring(value[0]+1,value[1]);
+    set_stime_s = str1.substring(value[2]+1,value[3]);
+    nstate = str1.substring(value[4]+1,value[5]).toInt();
+    ftime =  str1.substring(value[6]+1,value[7]).toInt();
+    ptime = str1.substring(value[8]+1,value[9]).toInt();
+    stime = (set_stime_m.toInt()*60)+set_stime_s.toInt();
+    //Serial.println(set_stime_m);Serial.println(set_stime_s);Serial.println(nstate);Serial.println(ftime);Serial.println(ptime);
+  }
 }
 
 void count()
 {
   ttime +=1;
-  if(nstate)
+  if(stime < 0 && nstate == 1)
+  {
+    nstate = 3;
+  }
+  if(nstate == 1 || nstate ==  3)
   {
     stime -=1;
   }
@@ -169,15 +215,15 @@ void setup() {
   });
   server.on("/set_state_on", []() { 
     server.send(200, "text/html",RE_SET );
-    Serial.print("nstate: ");
+    //Serial.print("nstate: ");
     nstate = 1;
-    Serial.println(nstate);
+    //Serial.println(nstate);
   });
   server.on("/set_state_off", []() {
     server.send(200, "text/html",RE_SET );
-    Serial.print("nstate: ");
+    //Serial.print("nstate: ");
     nstate = 0;
-    Serial.println(nstate);
+    //Serial.println(nstate);
   });
 
   server.on("/data.json", []() {
@@ -194,22 +240,41 @@ void setup() {
     else
     {
       set_stime =  (set_stime_m.toInt()*60)+(set_stime_s.toInt());
-      Serial.print("stime: ");
-      Serial.println(set_stime);
+      //Serial.print("stime: ");
+      //Serial.println(set_stime);
       stime = set_stime;
+      nstate = 2;
     }
+    
     set_ftime_m = server.arg("set_ftime_m");
     set_ftime_s = server.arg("set_ftime_s");
-    set_ftime =  (set_ftime_m.toInt()*60)+(set_ftime_s.toInt());
+    if((set_ftime_m=="") && (set_ftime_s==""))
+    {
+        //Serial.println("No Enter the ftime Data.");
+    }
+    else
+    {
+      set_ftime =  (set_ftime_m.toInt()*60)+(set_ftime_s.toInt());
+      //Serial.print("ftime: ");
+      //Serial.println(set_ftime);
+      ftime = set_ftime;
+      nstate = 2;
+    }
+
     set_ptime_m = server.arg("set_ptime_m");
     set_ptime_s = server.arg("set_ptime_s");
-    set_ptime =  (set_ptime_m.toInt()*60)+(set_ptime_s.toInt());
-    Serial.print("ftime: ");
-    Serial.println(set_ftime);
-    ftime = set_ftime;
-    Serial.print("ptime: ");
-    Serial.println(set_ptime);
-    ptime = set_ptime;
+    if((set_ptime_m=="") && (set_ptime_s==""))
+    {
+        //Serial.println("No Enter the ptime Data.");
+    }
+    else
+    {
+      set_ptime =  (set_ptime_m.toInt()*60)+(set_ptime_s.toInt());
+      //Serial.print("ptime: ");
+      //Serial.println(set_ptime);
+      ptime = set_ptime;
+      nstate = 2;
+    }
     server.send(200, "text/html",SET_VAR );
     //Serial.println("已完成設定");
   });
@@ -218,7 +283,7 @@ void setup() {
 //NEW
   SPIFFS.begin(); 
   t1s.every(1000,count);
-  t5s.every(5000,correction);
+  t5s.every(500,correction);
 }
 
 void loop() 
@@ -226,12 +291,7 @@ void loop()
   server.handleClient();
   t1s.update();
   t5s.update();
-
-  String readdata ;
-  while (Serial.available()>0) {   //如果暫存器有訊號則不斷讀取直到沒有
-    readdata=Serial.readString();
-    //Serial.print(readdata);
-  }
+  get_info_arm();
 }
 
 void LOG()
