@@ -17,10 +17,10 @@ function get_data_json() {
       $("#id_ptime").html(Jdata[0]["ptime"]);
 	  switch(nstate_data)
 	  {
-        case "0":nstate = $("#id_nstate").html("STOP");;break;
-        case "1":nstate = $("#id_nstate").html("START");;break;
-        case "2":nstate = $("#id_nstate").html("SETTING");;break;
-        case "3":nstate = $("#id_nstate").html("TIME'S UP SO UP COUNT");;break ;
+        case "1":nstate = $("#id_nstate").html("STOP");;break;
+        case "2":nstate = $("#id_nstate").html("START");;break;
+        case "3":nstate = $("#id_nstate").html("SETTING");;break;
+        case "4":nstate = $("#id_nstate").html("TIME'S UP SO UP COUNT");;break ;
       }
      //ducument.getElementById("id_nstate").innerHTML = nstate ;
      //$("#id_nstate").html(nstate);
