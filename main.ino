@@ -21,7 +21,7 @@ int set_ptime;
 int ttime = 0; //總時間
 int stime = 0; //剩餘時間
 int nstate = 3;//倒數狀態 STOP/START/SETTING/UP
-int ftime = 5; //閃爍時間
+int ftime = 2; //閃爍次數
 int ptime = 30;//提示鈴時間
 const char RE_LOG[] =
 "<!DOCTYPE html>"
@@ -110,9 +110,11 @@ const char SET_VAR[] =
 ESP8266WebServer server(80);
 Timer t1s;
 Timer t5s;
+Timer t400ms;
 
 void correction()
 {
+  digitalWrite(14,HIGH); //14 = GPIO14 = D5
   Serial.print("Am");
   Serial.print(String(ttime/60)+",");
   Serial.print("As");
@@ -128,8 +130,10 @@ void correction()
   Serial.print("E");
   //Serial.print(String(ptime)+",");
   Serial.println(String(ptime)+",");
+  digitalWrite(14,LOW);
 }
 int flag_tx = 0;
+bool brin = LOW;
 void get_info_arm()
 {
   if(Serial.available())
@@ -171,9 +175,16 @@ void count()
     stime -=1;
   }
 }
-
+unsigned long t400mso;
+unsigned long t400msn;
+unsigned long t1so;
+unsigned long t1sn;
 void setup() {
   pinMode(LED_BUILTIN,OUTPUT);
+  pinMode(14,OUTPUT); //D5 GPIO14
+  //pinMode(4,OUTPUT); //D2 GPIO4
+  digitalWrite(14,LOW);
+  //digitalWrite(14,HIGH);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid,password); 
@@ -275,18 +286,43 @@ void setup() {
 
 //NEW
   SPIFFS.begin(); 
-  t1s.every(1000,count);
-  t5s.every(1000,correction);
+  //t1s.every(1000,count);
+  //t5s.every(1000,correction);
+  //t400ms.every(400,serverHC);
+  t400msn = millis();
+  t400mso = 0;
+  t1sn =millis();
+  t1so = 0;
 }
 
 void loop() 
 {
-  server.handleClient();
-  t1s.update();
-  t5s.update();
+  t400msn = millis();
+  t1sn =millis();
+  /*if((t400msn-t400mso)>=200)
+  {
+    t400mso = millis();
+    serverHC();
+  }*/
+  serverHC();
+
+  if((t1sn-t1so) >= 1000)
+  {
+    t1so = millis();
+    count();
+    correction();
+    //brin = !brin;
+    //digitalWrite(4,brin);
+  }
+  //server.handleClient();
+  //t1s.update();
+  //t5s.update();
   get_info_arm();
 }
-
+void serverHC()
+{
+  server.handleClient();
+}
 void LOG()
 {
   File file = SPIFFS.open("/LOG.html", "r"); 
